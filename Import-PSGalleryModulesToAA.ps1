@@ -71,9 +71,9 @@ Write-Output -InputObject "Starting Runbook: $RunbookName at time: $(get-Date -f
 # Prefer to use Az module if available
 if((Get-Module -Name "Az.Accounts" -ListAvailable) -and (Get-Module -Name "Az.Automation" -ListAvailable) -and (Get-Module -Name "Az.Resources" -ListAvailable))
 {
-    $AccountsModule = Get-Module -Name Az.Accounts -ListAvailable
-    $AutomationModule = Get-Module -Name Az.Automation -ListAvailable
-    $ResourcesModule = Get-Module -Name Az.Resources -ListAvailable
+    $AccountsModule = Get-Module -Name Az.Accounts -ListAvailable | Sort-Object -Unique -Descending -Property Version | Select-Object -First 1
+    $AutomationModule = Get-Module -Name Az.Automation -ListAvailable | Sort-Object -Unique -Descending -Property Version | Select-Object -First 1
+    $ResourcesModule = Get-Module -Name Az.Resources -ListAvailable | Sort-Object -Unique -Descending -Property Version | Select-Object -First 1
 
     Write-Output -InputObject "Running Az.Account version: $($AccountsModule.Version)"
     Write-Output -InputObject "Running Az.Automation version: $($AutomationModule.Version)"
@@ -92,9 +92,9 @@ if((Get-Module -Name "Az.Accounts" -ListAvailable) -and (Get-Module -Name "Az.Au
 }
 elseif((Get-Module -Name AzureRM.Profile -ListAvailable) -and (Get-Module -Name AzureRM.Automation -ListAvailable) -and (Get-Module -Name AzureRM.Resources -ListAvailable))
 {
-    $ProfileModule = Get-Module -Name AzureRM.Profile -ListAvailable
-    $AutomationModule = Get-Module -Name AzureRM.Automation -ListAvailable
-    $ResourcesModule = Get-Module -Name AzureRM.Resources -ListAvailable
+    $ProfileModule = Get-Module -Name AzureRM.Profile -ListAvailable | Sort-Object -Unique -Descending -Property Version | Select-Object -First 1
+    $AutomationModule = Get-Module -Name AzureRM.Automation -ListAvailable | Sort-Object -Unique -Descending -Property Version | Select-Object -First 1
+    $ResourcesModule = Get-Module -Name AzureRM.Resources -ListAvailable | Sort-Object -Unique -Descending -Property Version | Select-Object -First 1
 
     Write-Output -InputObject "Running AzureRM.Profile version: $($ProfileModule.Version)"
     Write-Output -InputObject "Running AzureRM.Automation version: $($AutomationModule.Version)"
