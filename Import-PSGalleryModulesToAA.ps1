@@ -32,6 +32,9 @@
     If an automation account is not specified, then it will use the current one for the automation account
     if it is run from the automation service
 
+.PARAMETER Version
+    Optional. If importing only one module desired version can be set
+
 .PARAMETER Force
     Optional. Forces import of newest version in PS Gallery
 
@@ -58,6 +61,9 @@ param(
 
     [Parameter(Mandatory = $false)]
     [String] $AutomationAccountName,
+
+    [Parameter(Mandatory = $false)]
+    [string] $Version = $null,
 
     [Parameter(Mandatory = $false)]
     [Bool] $Force = $false,
@@ -463,12 +469,24 @@ try
 
             if ($NewModuleName -notin $Modules.Name -or $Force)
             {
-                Write-Output -InputObject "Importing latest version of '$NewModuleName' into your automation account"
 
-                doModuleImport `
+                if($NewModuleNames.Count -eq 1 -and $Version)
+                {
+                    Write-Output -InputObject "Module to import: '$NewModuleName' with specific version: $Version"
+                    doModuleImport `
+                    -AutomationResourceGroupName $AutomationResourceGroupName `
+                    -AutomationAccountName $AutomationAccountName `
+                    -ModuleName $NewModuleName `
+                    -ModuleVersion $Version
+                }
+                else
+                {
+                    Write-Output -InputObject "Module to import: '$NewModuleName' using latest available in Gallery"
+                    doModuleImport `
                     -AutomationResourceGroupName $AutomationResourceGroupName `
                     -AutomationAccountName $AutomationAccountName `
                     -ModuleName $NewModuleName -ErrorAction Continue
+                }
             }
             else
             {
