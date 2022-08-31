@@ -75,13 +75,6 @@ $VerbosePreference = "silentlycontinue"
 $RunbookName = "Import-PSGalleryModulesInAA"
 Write-Output -InputObject "Starting Runbook: $RunbookName at time: $(get-Date -format r).`nRunning PS version: $($PSVersionTable.PSVersion)`nOn host: $($env:computername)"
 
-if( $PSVersionTable.PSVersion.Major -eq 5 )
-{
-    # For 5.1 import of Microsoft.Graph will fail as the below value is to small
-    $maximumfunctioncount = 8192
-    Write-Output -InputObject "Maximum fucntion count is set to: $maximumfunctioncount"
-}
-
 # Prefer to use Az module if available
 if((Get-Module -Name "Az.Accounts" -ListAvailable) -and (Get-Module -Name "Az.Automation" -ListAvailable) -and (Get-Module -Name "Az.Resources" -ListAvailable))
 {
@@ -167,11 +160,6 @@ function doModuleImport
     )
     try
     {
-        if( $PSVersionTable.PSVersion.Major -eq 5 )
-        {
-            Write-Output -InputObject "Maximum fucntion count is set to: $maximumfunctioncount inside doModuleImport"
-        }
-
         $Filter = @($ModuleName.Trim('*').Split('*') | ForEach-Object { "substringof('$_',Id)" }) -join " and "
         $Url = "$script:PsGalleryApiUrl/Packages?`$filter=$Filter and IsLatestVersion"
 
