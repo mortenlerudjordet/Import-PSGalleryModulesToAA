@@ -49,7 +49,7 @@
 .NOTES
     AUTHOR:         Automation Team
     CONTRIBUTOR:    Morten Lerudjordet
-    LASTEDIT:       09.06.2019
+    LASTEDIT:       31.08.2022
 #>
 
 param(
@@ -74,6 +74,14 @@ param(
 $VerbosePreference = "silentlycontinue"
 $RunbookName = "Import-PSGalleryModulesInAA"
 Write-Output -InputObject "Starting Runbook: $RunbookName at time: $(get-Date -format r).`nRunning PS version: $($PSVersionTable.PSVersion)`nOn host: $($env:computername)"
+
+if( $PSVersionTable.PSVersion.Major -eq 5 )
+{
+    # For 5.1 import of Microsoft.Graph will fail as the below value is to small
+    $maximumfunctioncount = 8192
+    Write-Output -InputObject "Maximum fucntion count is set to: $maximumfunctioncount"
+}
+
 # Prefer to use Az module if available
 if((Get-Module -Name "Az.Accounts" -ListAvailable) -and (Get-Module -Name "Az.Automation" -ListAvailable) -and (Get-Module -Name "Az.Resources" -ListAvailable))
 {
@@ -159,6 +167,11 @@ function doModuleImport
     )
     try
     {
+        if( $PSVersionTable.PSVersion.Major -eq 5 )
+        {
+            Write-Output -InputObject "Maximum fucntion count is set to: $maximumfunctioncount inside doModuleImport"
+        }
+
         $Filter = @($ModuleName.Trim('*').Split('*') | ForEach-Object { "substringof('$_',Id)" }) -join " and "
         $Url = "$script:PsGalleryApiUrl/Packages?`$filter=$Filter and IsLatestVersion"
 
@@ -235,6 +248,8 @@ function doModuleImport
                                 -AutomationAccountName $AutomationAccountName `
                                 -Name $DependencyName `
                                 -ErrorAction SilentlyContinue
+                            # Filter out Global modules
+                            $AutomationModule = $AutomationModule | Where-Object { $PsItem.IsGlobal -eq $false }
                             # Do not downgrade version of module if newer exists in Automation account (limitation of AA that one can only have only one version of a module imported)
                             # limit also recursion depth of dependencies search
                             if( ($script:RecursionDepth -le $script:RecursionDepthLimit) -and ((-not $AutomationModule) -or [System.Version]$AutomationModule.Version -lt [System.Version]$DependencyVersion) )
