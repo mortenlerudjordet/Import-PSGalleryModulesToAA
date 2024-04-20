@@ -5,7 +5,7 @@
 
     NOTE:
         Running this on a new AA account one must input both AutomationResourceGroupName and AutomationAccountName
-        As this introduces runtime version support, before running make sure Az.Accounts, Az.Automation and Az.Resources are updatet to the latest version
+        As this introduces runtime version support, before running make sure Az.Accounts, Az.Automation and Az.Resources are updated to the latest version
         on both 5.1 and 7.2 runtime before running this.
 
 .DESCRIPTION
@@ -172,6 +172,9 @@ function doModuleImport
         [Parameter(Mandatory = $true)]
         [String] $ModuleName,
 
+        [Parameter(Mandatory = $true)]
+        [string] $AutomationRuntime,
+
         # if not specified latest version will be imported
         [Parameter(Mandatory = $false)]
         [String] $ModuleVersion
@@ -271,6 +274,7 @@ function doModuleImport
                                     -AutomationResourceGroupName $AutomationResourceGroupName `
                                     -AutomationAccountName $AutomationAccountName `
                                     -ModuleName $DependencyName `
+                                    -AutomationRuntime $AutomationRuntime `
                                     -ModuleVersion $DependencyVersion -ErrorAction Continue
                                 # Register module has been imported
                                 # TODO: If module import fails, do not add and remove the failed imported module from AA account
@@ -359,7 +363,7 @@ function doModuleImport
                 {
                     Start-Sleep -Seconds 5
                     Write-Verbose -Message "Polling module import status for: $($AutomationModule.Name)"
-                    $AutomationModule = $AutomationModule | Get-AzureRMAutomationModule -ErrorAction silentlycontinue -ErrorVariable oErr
+                    $AutomationModule = $AutomationModule | Get-AzureRMAutomationModule -RuntimeVersion $AutomationRuntime -ErrorAction silentlycontinue -ErrorVariable oErr
                     if($oErr)
                     {
                         Write-Error -Message "Error fetching module status for: $($AutomationModule.Name)" -ErrorAction Continue
@@ -560,6 +564,7 @@ try
                     -AutomationResourceGroupName $AutomationResourceGroupName `
                     -AutomationAccountName $AutomationAccountName `
                     -ModuleName $NewModuleName `
+                    -AutomationRuntime $AutomationRuntime `
                     -ModuleVersion $Version
                 }
                 else
@@ -568,6 +573,7 @@ try
                     doModuleImport `
                     -AutomationResourceGroupName $AutomationResourceGroupName `
                     -AutomationAccountName $AutomationAccountName `
+                    -AutomationRuntime $AutomationRuntime `
                     -ModuleName $NewModuleName -ErrorAction Continue
                 }
             }
