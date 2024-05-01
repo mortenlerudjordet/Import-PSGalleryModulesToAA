@@ -8,6 +8,9 @@
         As this introduces runtime version support, before running make sure Az.Accounts, Az.Automation and Az.Resources are updated to the latest version
         on both 5.1 and 7.2 runtime before running this.
 
+        Also make sure to create a connection asset named "AzureRunAsConnection" in the Automation account before running this script.
+        Just need to add TenantId and SubscriptionId, the other parameters are not used.
+
 .DESCRIPTION
     This Azure Automation Runbook imports a module named as parameter input to AA from PowerShell Gallery.
 
